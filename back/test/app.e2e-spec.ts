@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { v4 } from 'uuid';
+import { readFileSync } from 'fs';
 
 // Beware! These test-cases are stateful and must run with --runInBand
 describe('AppController (e2e)', () => {
@@ -9,6 +11,7 @@ describe('AppController (e2e)', () => {
     TEST_SESSION_DATA: any;
     UUIDV4_REX: RegExp;
     pin?: string;
+    fileguid?: string;
   };
 
   beforeAll(async () => {
@@ -82,5 +85,36 @@ describe('AppController (e2e)', () => {
     getSessionResponse.body.fileInfoList.forEach((fileInfo) => {
       expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
     });
+  });
+
+  it('/upload/:guid (POST)', async () => {
+    const guid = v4();
+    app.fileguid = guid;
+
+    const content = `Hello, I'm a test file!`;
+    const buffer = Buffer.from(content);
+
+    const httpServer = app.getHttpServer();
+
+    const uploadRequest = request(httpServer)
+      .post(`/upload/${guid}`)
+      .set({ connection: 'keep-alive' })
+      .attach('filecontent', buffer, {
+        filename: 'testfile.txt',
+        contentType: 'text/plain; charset=utf-8',
+      })
+      .end(() => {});
+
+    await new Promise((res) => setTimeout(() => res(42), 1000));
+
+    console.log('Await http get');
+    const data = readFileSync('/tmp/streams/main.ts');
+
+    const response = await request(httpServer)
+      .get(`/download/${guid}`)
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(200);
+
+    expect(response.text).toMatch(content);
   });
 });

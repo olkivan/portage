@@ -31,7 +31,7 @@ export class SessionProvider {
 
   createSession(fileInfoList: FileInfoDto[], context: any = null): SessionInfo {
     const pin = generatePIN();
-   
+
     const sessionInfo: SessionInfo = {
       pin,
       fileInfoList: fileInfoList.map((info) => ({ uuid: v4(), ...info })),
