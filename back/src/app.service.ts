@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { SessionInfo, SessionProvider } from './session.provider';
-import { FileInfoDto } from './dto';
+import { FileInfo, SessionInfo, SessionProvider } from './session.provider';
 
 @Injectable()
 export class AppService {
   private sessionProvider = SessionProvider.getInstance();
-  
-  getSession(pin: string) : SessionInfo | null {
+
+  getSession(pin: string): SessionInfo | null {
     return this.sessionProvider.getSession(pin);
   }
 
-  createSession(fileInfoList: FileInfoDto[]): SessionInfo {
-    console.log(`app.service.createSession(${fileInfoList})`);
+  createSession(fileInfoList: FileInfo[]): SessionInfo {
+    console.log(Array.isArray(fileInfoList));
+    console.log(`app.service.createSession(${JSON.stringify(fileInfoList)})`);
 
     return this.sessionProvider.createSession(fileInfoList);
   }

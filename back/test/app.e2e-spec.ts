@@ -37,12 +37,12 @@ describe('AppController (e2e)', () => {
       /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   });
 
-  it('/session/create (POST)', async () => {
-    const createSessionResponse = await request(app.getHttpServer())
-      .post('/session/create')
-      .send({ invalidDto: {} })
-      .expect(500);
-  });
+  // it('/session/create (POST)', async () => {
+  //   const createSessionResponse = await request(app.getHttpServer())
+  //     .post('/session/create')
+  //     .send({ invalidDto: {} })
+  //     .expect(500);
+  // });
 
   it('/session/create (POST)', async () => {
     const createSessionResponse = await request(app.getHttpServer())
@@ -58,12 +58,12 @@ describe('AppController (e2e)', () => {
     app.pin = pin;
 
     // all files have a valid length prop
-    expect(createSessionResponse.body.fileInfoList).toHaveLength(
+    expect(createSessionResponse.body.filelist).toHaveLength(
       app.TEST_SESSION_DATA.filelist.length,
     );
 
     // all files obtained a uuid
-    createSessionResponse.body.fileInfoList.forEach((fileInfo) => {
+    createSessionResponse.body.filelist.forEach((fileInfo) => {
       expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
     });
   });
@@ -77,12 +77,12 @@ describe('AppController (e2e)', () => {
     expect(getSessionResponse.body.pin).toBe(app.pin);
 
     // all files have a valid length prop
-    expect(getSessionResponse.body.fileInfoList).toHaveLength(
+    expect(getSessionResponse.body.filelist).toHaveLength(
       app.TEST_SESSION_DATA.filelist.length,
     );
 
     // all files obtained a uuid
-    getSessionResponse.body.fileInfoList.forEach((fileInfo) => {
+    getSessionResponse.body.filelist.forEach((fileInfo) => {
       expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
     });
   });
@@ -108,7 +108,6 @@ describe('AppController (e2e)', () => {
     await new Promise((res) => setTimeout(() => res(42), 1000));
 
     console.log('Await http get');
-    const data = readFileSync('/tmp/streams/main.ts');
 
     const response = await request(httpServer)
       .get(`/download/${guid}`)

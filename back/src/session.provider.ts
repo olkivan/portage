@@ -1,5 +1,4 @@
 import { v4 } from 'uuid';
-import { FileInfoDto } from './dto';
 
 const generatePIN = (): string => {
   let pin = 'xxxxxx';
@@ -9,13 +8,15 @@ const generatePIN = (): string => {
   return pin;
 };
 
-export interface FileInfo extends FileInfoDto {
-  uuid: string;
+export interface FileInfo {
+  name: string;
+  size: number;
+  uuid?: string;
 }
 
 export interface SessionInfo {
   pin: string;
-  fileInfoList: FileInfo[];
+  filelist: FileInfo[];
   context: any;
 }
 
@@ -29,18 +30,22 @@ export class SessionProvider {
     return SessionProvider.instance;
   }
 
-  createSession(fileInfoList: FileInfoDto[], context: any = null): SessionInfo {
+  createSession(filelist: FileInfo[], context: any = null): SessionInfo {
     const pin = generatePIN();
 
     const sessionInfo: SessionInfo = {
       pin,
-      fileInfoList: fileInfoList.map((info) => ({ uuid: v4(), ...info })),
+      filelist: filelist.map((info) => ({ uuid: v4(), ...info })),
       context: context,
     };
 
     this.sessions.set(pin, sessionInfo);
 
     return sessionInfo;
+  }
+
+  hasSession(pin: string): boolean {
+    return this.sessions.has(pin);
   }
 
   getSession(pin: string): SessionInfo | null {

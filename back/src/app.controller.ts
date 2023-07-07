@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { SessionInfo } from './session.provider';
-import { CreateSessionDto } from './dto';
+import { SessionDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import MulterStorage, { FileRepository } from './multer-storage';
@@ -27,9 +27,12 @@ export class AppController {
   }
 
   @Post('/session/create')
-  async createSession(@Body() body: CreateSessionDto): Promise<SessionInfo> {
+  async createSession(@Body() body: SessionDto): Promise<SessionDto | null> {
     console.log('body', body);
-    return this.appService.createSession(body.filelist);
+    const sessionInfo = this.appService.createSession(body.filelist);
+    if (!sessionInfo) return null;
+    const { context, ...sessionInfoDto } = sessionInfo;
+    return sessionInfoDto;
   }
 
   @Post('/upload/:uuid')
