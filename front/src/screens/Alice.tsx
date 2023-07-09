@@ -2,8 +2,8 @@ import { Box, Button, Grid, Typography } from '@mui/material'
 
 import { selectFiles, setFiles, setScreen } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { ChangeEvent, FormEvent, useCallback, useRef } from 'react'
-import { BackendAPI, FileInfo } from '../BackendAPI'
+import { ChangeEvent, FormEvent, useCallback, useRef, useState } from 'react'
+import { BackendAPI, FileInfo, isAPIError } from '../BackendAPI'
 
 import { FileList } from '../components/FileList'
 
@@ -12,27 +12,47 @@ const uuid = '123456-7890-1234-1234'
 export default () => {
   const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
+  const [pin, setPin] = useState('')
 
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const handleSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (
-      !fileRef.current ||
-      !fileRef.current.files ||
-      !fileRef.current.files.length
-    ) {
-      console.log('No files are there')
-      return
-    }
+  const handleSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (
+        !fileRef.current ||
+        !fileRef.current.files ||
+        !fileRef.current.files.length
+      ) {
+        console.log('No files are there')
+        return
+      }
 
-    const formData = new FormData()
-    ;[...fileRef.current.files].forEach((f: File) => {
-      formData.append('filecontent', f)
-    })
-    console.log('handleSubmit', formData)
-    BackendAPI.uploadFile(uuid, formData)
-  }, [])
+      const session = await BackendAPI.createSession(files)
+      if (isAPIError(session)) {
+        console.log(session.error)
+        return
+      }
+
+      const { pin, filelist } = session
+
+      setPin(pin)
+
+      // Populate files info with uuids
+      const filesWithUUID = files.map((fileInfo, i) => {
+        if (fileInfo.name != filelist[i].name) {
+          throw new Error('File name mismatch')
+        }
+        return {
+          ...fileInfo,
+          ...filelist[i],
+        }
+      })
+
+      dispatch(setFiles(filesWithUUID))
+    },
+    [files]
+  )
 
   const handleUploadListChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +61,7 @@ export default () => {
         name: f.name,
         size: f.size,
         file: f,
+        selected: true,
       }))
 
       dispatch(setFiles(fileList))
@@ -73,21 +94,30 @@ export default () => {
                 ref={fileRef}
                 id="files_to_upload"
                 name="files_to_upload"
-                // multiple
+                multiple
                 hidden
                 onChange={handleUploadListChange}
               />
             </Button>
           </Box>
         </Grid>
-        {files.length ? <FileList files={files}></FileList> : null}
-        <Grid item>
-          <Box>
-            <Button type="submit" variant="contained">
-              Start transfer
-            </Button>
-          </Box>
-        </Grid>
+        {files.length ? <FileList></FileList> : null}
+        {pin ? (
+          <Grid item>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h5">PIN: {pin}</Typography>
+              <Typography variant="h6">(share it with other party)</Typography>
+            </Box>
+          </Grid>
+        ) : (
+          <Grid item>
+            <Box sx={{ mt: 2 }}>
+              <Button type="submit" variant="contained">
+                Start transfer
+              </Button>
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </form>
   )

@@ -2,11 +2,12 @@ import axios from 'axios'
 
 export const API_URL = `http://localhost:3001/api/v1`
 
-// TODO: better to split into two separae types FileInfo and FileInfoDto?
+// TODO: better to split into two separate types FileInfo and FileInfoDto?
 export type FileInfo = {
   uuid?: string
   name: string
   size: number
+  selected: boolean
   file?: File
 }
 

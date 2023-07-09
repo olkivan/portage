@@ -40,7 +40,7 @@ export default () => {
         </Box>
         {files.length ? (
           <>
-            <FileList files={files}></FileList>
+            <FileList/>
             <Box>
               <Button
                 variant="contained"

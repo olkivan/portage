@@ -10,9 +10,13 @@ import {
   Paper,
   CircularProgress,
   CircularProgressProps,
+  Checkbox,
 } from '@mui/material'
 
 import { FileInfo } from '../BackendAPI'
+import { useCallback } from 'react'
+import { selectFiles, setFiles } from '../redux/globalsSlice'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number }
@@ -42,32 +46,59 @@ function CircularProgressWithLabel(
   )
 }
 
-export const FileList = ({ files }: { files: FileInfo[] }) => (
-  <TableContainer component={Paper}>
-    <Table aria-label="file list table">
-      <TableHead>
-        <TableRow>
-          <TableCell>File name</TableCell>
-          <TableCell align="right">File Size</TableCell>
-          <TableCell align="center">Transfer progress</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {files.map(({ name, size }: FileInfo, i) => (
-          <TableRow
-            key={name}
-            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-          >
-            <TableCell component="th" scope="row">
-              {name}
-            </TableCell>
-            <TableCell align="right">{size}</TableCell>
-            <TableCell align="center">
-              <CircularProgressWithLabel value={42} />
-            </TableCell>
+export const FileList = () => {
+  const dispatch = useAppDispatch()
+  const files: FileInfo[] = useAppSelector(selectFiles)
+
+  const handleSelectedChange = useCallback(
+    (uuid: string) => {
+      const updatedFiles = files.map((f) => ({
+        ...f,
+        selected: f.uuid === uuid ? !f.selected : f.selected,
+      }))
+      dispatch(setFiles(updatedFiles))
+    },
+    [files]
+  )
+
+  const withUUID = !!files[0].uuid
+
+  return (
+    <TableContainer component={Paper}>
+      <Table aria-label="file list table">
+        <TableHead>
+          <TableRow>
+            <TableCell>File name</TableCell>
+            <TableCell align="right">File Size</TableCell>
+            <TableCell align="center">Transfer progress</TableCell>
+            {withUUID && <TableCell align="center">Download</TableCell>}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>
-)
+        </TableHead>
+        <TableBody>
+          {files.map(({ name, size, uuid, selected }: FileInfo, i) => (
+            <TableRow
+              key={`${name}-${i}`}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {name}
+              </TableCell>
+              <TableCell align="right">{size}</TableCell>
+              <TableCell align="center">
+                <CircularProgressWithLabel value={42} />
+              </TableCell>
+              {uuid && (
+                <TableCell align="center">
+                  <Checkbox
+                    checked={selected}
+                    onChange={() => handleSelectedChange(uuid)}
+                  />
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  )
+}
