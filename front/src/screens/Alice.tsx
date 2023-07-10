@@ -19,11 +19,7 @@ export default () => {
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      if (
-        !fileRef.current ||
-        !fileRef.current.files ||
-        !fileRef.current.files.length
-      ) {
+      if (!files.length) {
         console.log('No files are there')
         return
       }
@@ -47,6 +43,15 @@ export default () => {
           ...fileInfo,
           ...filelist[i],
         }
+      })
+
+      filesWithUUID.map(({ name, file, uuid }) => {
+        if (!uuid) throw new Error(`File has no uuid: ${uuid} ${name}`)
+        if (!file) throw new Error(`File object is empty: ${uuid} ${name}`)
+
+        const formData = new FormData()
+        formData.append('filecontent', file)
+        BackendAPI.uploadFile(uuid, formData)
       })
 
       dispatch(setFiles(filesWithUUID))
