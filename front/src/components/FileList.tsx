@@ -9,14 +9,29 @@ import {
 } from '@mui/material'
 
 import { FileInfo } from '../BackendAPI'
-import { useCallback } from 'react'
 import { selectFiles, setFiles } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { useCallback } from 'react'
 
 export const FileList = () => {
+  const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
 
-  const withUUID = !!files[0].uuid
+  const handleLinkClick = useCallback(
+    (uuid: string) => {
+      dispatch(
+        setFiles(
+          files.map((fileInfo: FileInfo) => {
+            return {
+              ...fileInfo,
+              requested: fileInfo.uuid === uuid ? true : fileInfo.requested,
+            }
+          })
+        )
+      )
+    },
+    [files]
+  )
 
   return (
     <TableContainer component={Paper}>
@@ -42,7 +57,7 @@ export const FileList = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {files.map(({ name, size, uuid, selected }: FileInfo, i) => (
+          {files.map(({ name, size, uuid, requested }: FileInfo, i) => (
             <TableRow
               key={`${name}-${i}`}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -55,8 +70,11 @@ export const FileList = () => {
                 }}
                 width="50%"
               >
-                {withUUID ? (
-                  <a href={`http://localhost:3001/api/v1/download/${uuid}`}>
+                {uuid && !requested ? (
+                  <a
+                    href={`http://localhost:3001/api/v1/download/${uuid}`}
+                    onClick={() => handleLinkClick(uuid)}
+                  >
                     {name}
                   </a>
                 ) : (

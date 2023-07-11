@@ -7,7 +7,7 @@ export type FileInfo = {
   uuid?: string
   name: string
   size: number
-  selected: boolean
+  requested?: boolean
   file?: File
 }
 
