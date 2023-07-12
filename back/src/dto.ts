@@ -1,10 +1,17 @@
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class FileInfoDto {
   @IsString()
   name: string;
-  
+
   @IsNumber()
   size: number;
 
@@ -12,7 +19,6 @@ export class FileInfoDto {
   @IsString()
   uuid?: string;
 }
-
 
 export class SessionDto {
   @IsOptional()

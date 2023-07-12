@@ -3,6 +3,8 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { createWriteStream } from 'fs';
 import { StorageEngine } from 'multer';
 import { ParsedQs } from 'qs';
+import { SessionProvider } from './session.provider';
+import { BadRequestException } from '@nestjs/common';
 
 type ExpressRequest = Request<
   ParamsDictionary,
@@ -25,12 +27,18 @@ export default class MulterStorage implements StorageEngine {
     file: Express.Multer.File,
     cb: MulterCallback,
   ): void {
-    console.log('_handleFile', req.params.uuid, file);
-    const fileUUID = req.params.uuid;
+    const { pin, uuid } = req.params;
+    console.log(`_handleFile ${pin}/${uuid}`, file);
 
-    FileRepository.set(fileUUID, file);
+    const session = this.sessions.getSession(pin);
+    if (!session) throw new BadRequestException(`invalid pin: ${pin}`);
+
+    if (!session.filelist.some((f) => f.uuid === uuid))
+      throw new BadRequestException(`invalid pin: ${pin} or uuid: ${uuid}`);
+
+    FileRepository.set(uuid, file);
     file.stream.on('end', () => {
-      console.log(`File ${fileUUID} transfer completed: ${file.originalname}`);
+      console.log(`File ${uuid} transfer completed: ${file.originalname}`);
       cb();
     });
   }
@@ -43,4 +51,6 @@ export default class MulterStorage implements StorageEngine {
     console.log(`_removeFile callback is called`);
     cb(null);
   }
+
+  private sessions = SessionProvider.getInstance();
 }

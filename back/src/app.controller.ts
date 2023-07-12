@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { SessionInfo } from './session.provider';
+import { SessionInfo, SessionProvider } from './session.provider';
 import { SessionDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -35,24 +35,35 @@ export class AppController {
     return sessionInfoDto;
   }
 
-  @Post('/upload/:uuid')
+  @Post('/upload/:pin/:uuid')
   @UseInterceptors(
     FileInterceptor('filecontent', {
       storage: new MulterStorage(),
     }),
   )
   async uploadFile(
+    @Param('pin') pin: string,
     @Param('uuid') uuid: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(`upload file: ${uuid}`, file);
+    console.log(`upload file: ${pin}/${uuid}`, file);
     return { status: 'ok' };
   }
 
-  @Get('/download/:uuid')
-  async downloadFile(@Param('uuid') uuid: string, @Res() res: Response) {
+  @Get('/download/:pin/:uuid')
+  async downloadFile(
+    @Param('pin') pin: string,
+    @Param('uuid') uuid: string,
+    @Res() res: Response,
+  ) {
+    const session = this.sessions.getSession(pin);
+    if (!session) throw new BadRequestException(`invalid pin: ${pin}`);
+
+    if (!session.filelist.some((f) => f.uuid === uuid))
+      throw new BadRequestException(`invalid pin: ${pin} or uuid: ${uuid}`);
+
     const file = FileRepository.get(uuid);
-    if (!file) throw new BadRequestException('invalid file uuid');
+    if (!file) throw new BadRequestException(`invalid uuid: ${uuid}`);
 
     res.set('Content-Type', file.mimetype);
     res.set('Transfer-Encoding: chunked');
@@ -63,4 +74,6 @@ export class AppController {
 
     file.stream.pipe(res);
   }
+
+  private sessions = SessionProvider.getInstance();
 }
