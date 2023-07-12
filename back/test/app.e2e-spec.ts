@@ -2,16 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { v4 } from 'uuid';
-import { readFileSync } from 'fs';
+
+type TestAppContext = Partial<{
+  TEST_SESSION_DATA: {
+    filelist: { name: string; size: number; uuid?: string }[];
+  };
+  TEST_CONTENT: string;
+  TEST_UUIDV4_REX: RegExp;
+  TEST_PIN: string;
+}>;
 
 // Beware! These test-cases are stateful and must run with --runInBand
 describe('AppController (e2e)', () => {
-  let app: INestApplication & {
-    TEST_SESSION_DATA: any;
-    UUIDV4_REX: RegExp;
-    pin?: string;
-  };
+  let app: INestApplication & TestAppContext;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,6 +23,7 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    app.TEST_CONTENT = `Hello, I'm a test file!`;
     app.TEST_SESSION_DATA = {
       filelist: [
         {
@@ -36,7 +40,7 @@ describe('AppController (e2e)', () => {
         },
       ],
     };
-    app.UUIDV4_REX =
+    app.TEST_UUIDV4_REX =
       /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   });
 
@@ -58,7 +62,7 @@ describe('AppController (e2e)', () => {
 
     expect(pin).toMatch(/^\d{6}$/);
 
-    app.pin = pin;
+    app.TEST_PIN = pin;
 
     // all files have a valid length prop
     expect(createSessionResponse.body.filelist).toHaveLength(
@@ -67,17 +71,17 @@ describe('AppController (e2e)', () => {
 
     // all files obtained a uuid
     createSessionResponse.body.filelist.forEach((fileInfo) => {
-      expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
+      expect(fileInfo.uuid).toMatch(app.TEST_UUIDV4_REX);
     });
   });
 
   it('/sessions/:pin (GET)', async () => {
     const getSessionResponse = await request(app.getHttpServer())
-      .get(`/sessions/${app.pin}`)
+      .get(`/sessions/${app.TEST_PIN}`)
       .expect(200);
 
     // returned session info pin is correct
-    expect(getSessionResponse.body.pin).toBe(app.pin);
+    expect(getSessionResponse.body.pin).toBe(app.TEST_PIN);
 
     // all files have a valid length prop
     expect(getSessionResponse.body.filelist).toHaveLength(
@@ -86,7 +90,7 @@ describe('AppController (e2e)', () => {
 
     // all files obtained a uuid
     getSessionResponse.body.filelist.forEach((fileInfo, i) => {
-      expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
+      expect(fileInfo.uuid).toMatch(app.TEST_UUIDV4_REX);
     });
 
     // populate global test suite data
@@ -96,8 +100,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('/files/:pin/:guid (POST and Get)', async () => {
-    const content = `Hello, I'm a test file!`;
-    const buffer = Buffer.from(content);
+    const buffer = Buffer.from(app.TEST_CONTENT);
 
     const httpServer = app.getHttpServer();
 
@@ -108,8 +111,9 @@ describe('AppController (e2e)', () => {
 
     expect(fileInfo !== undefined);
 
-    const uploadRequest = request(httpServer)
-      .post(`/files/${app.pin}/${fileInfo.uuid}`)
+    // initiate upload request
+    request(httpServer)
+      .post(`/files/${app.TEST_PIN}/${fileInfo.uuid}`)
       .set({ connection: 'keep-alive' })
       .attach('filecontent', buffer, {
         filename: fileInfo.name,
@@ -117,15 +121,16 @@ describe('AppController (e2e)', () => {
       })
       .end(() => {});
 
+    // wait a sec and let event loop run
     await new Promise((res) => setTimeout(() => res(42), 1000));
 
-    console.log('Await http get');
-
+    // initiate download
     const response = await request(httpServer)
-      .get(`/files/${app.pin}/${fileInfo.uuid}`)
+      .get(`/files/${app.TEST_PIN}/${fileInfo.uuid}`)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(200);
 
-    expect(response.text).toMatch(content);
+    // content should match
+    expect(response.text).toMatch(app.TEST_CONTENT);
   });
 });
