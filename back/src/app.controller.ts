@@ -21,12 +21,12 @@ import { Response } from 'express';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get('/session/:pin')
+  @Get('/sessions/:pin')
   getSession(@Param('pin') pin: string): SessionInfo {
     return this.appService.getSession(pin);
   }
 
-  @Post('/session/create')
+  @Post('/sessions')
   async createSession(@Body() body: SessionDto): Promise<SessionDto | null> {
     console.log('body', body);
     const sessionInfo = this.appService.createSession(body.filelist);
@@ -35,7 +35,7 @@ export class AppController {
     return sessionInfoDto;
   }
 
-  @Post('/upload/:pin/:uuid')
+  @Post('/files/:pin/:uuid')
   @UseInterceptors(
     FileInterceptor('filecontent', {
       storage: new MulterStorage(),
@@ -50,7 +50,7 @@ export class AppController {
     return { status: 'ok' };
   }
 
-  @Get('/download/:pin/:uuid')
+  @Get('/files/:pin/:uuid')
   async downloadFile(
     @Param('pin') pin: string,
     @Param('uuid') uuid: string,

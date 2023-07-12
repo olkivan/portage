@@ -40,16 +40,16 @@ describe('AppController (e2e)', () => {
       /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   });
 
-  it('/session/create (POST)', async () => {
+  it('/sessions (POST)', async () => {
     const createSessionResponse = await request(app.getHttpServer())
-      .post('/session/create')
+      .post('/sessions')
       .send({ invalidDto: {} })
       .expect(500);
   });
 
-  it('/session/create (POST)', async () => {
+  it('/session (POST)', async () => {
     const createSessionResponse = await request(app.getHttpServer())
-      .post('/session/create')
+      .post('/sessions')
       .send(app.TEST_SESSION_DATA)
       .expect(201);
 
@@ -71,9 +71,9 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('/session/:pin (GET)', async () => {
+  it('/sessions/:pin (GET)', async () => {
     const getSessionResponse = await request(app.getHttpServer())
-      .get(`/session/${app.pin}`)
+      .get(`/sessions/${app.pin}`)
       .expect(200);
 
     // returned session info pin is correct
@@ -95,7 +95,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('/upload/:guid (POST)', async () => {
+  it('/files/:pin/:guid (POST and Get)', async () => {
     const content = `Hello, I'm a test file!`;
     const buffer = Buffer.from(content);
 
@@ -109,7 +109,7 @@ describe('AppController (e2e)', () => {
     expect(fileInfo !== undefined);
 
     const uploadRequest = request(httpServer)
-      .post(`/upload/${app.pin}/${fileInfo.uuid}`)
+      .post(`/files/${app.pin}/${fileInfo.uuid}`)
       .set({ connection: 'keep-alive' })
       .attach('filecontent', buffer, {
         filename: fileInfo.name,
@@ -122,7 +122,7 @@ describe('AppController (e2e)', () => {
     console.log('Await http get');
 
     const response = await request(httpServer)
-      .get(`/download/${app.pin}/${fileInfo.uuid}`)
+      .get(`/files/${app.pin}/${fileInfo.uuid}`)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(200);
 

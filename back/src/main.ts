@@ -10,7 +10,7 @@ async function bootstrap() {
   });
 
   app.enableCors();
-  app.setGlobalPrefix('/api/v1');
+  app.setGlobalPrefix('/v1');
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(PORT);
