@@ -26,7 +26,7 @@ const Link = ({
 }) => {
   return (
     <a
-      href={`http://localhost:3001/api/v1/download/${pin}/${uuid}`}
+      href={`http://localhost:3001/v1/files/${pin}/${uuid}`}
       onClick={() => onClickCb(uuid)}
     >
       {name}

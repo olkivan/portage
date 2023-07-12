@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const API_URL = `http://localhost:3001/api/v1`
+export const API_URL = `http://localhost:3001/v1`
 
 // TODO: better to split into two separate types FileInfo and FileInfoDto?
 export type FileInfo = {
@@ -30,7 +30,7 @@ type CreateSessionDto = {
 async function createSession(
   files: FileInfo[]
 ): Promise<SessionDto | { error: string }> {
-  const rurl = `${API_URL}/session/create`
+  const rurl = `${API_URL}/sessions`
 
   const data: CreateSessionDto = {
     filelist: files.map(({ file, ...fileInfo }) => fileInfo),
@@ -57,7 +57,7 @@ async function uploadFile(
   if (!pin) return err(`invalid pin: ${pin}`)
   if (!uuid) return err(`invalid uuid: ${uuid}`)
 
-  const rurl = `${API_URL}/upload/${pin}/${uuid}`
+  const rurl = `${API_URL}/files/${pin}/${uuid}`
 
   try {
     const response = await axios.post(rurl, formData)
@@ -67,8 +67,8 @@ async function uploadFile(
   }
 }
 
-async function downloadFile(uuid: string): Promise<any> {
-  const rurl = `${API_URL}/download/${uuid}`
+async function downloadFile(pin: string, uuid: string): Promise<any> {
+  const rurl = `${API_URL}/files/${pin}/${uuid}`
 
   try {
     const response = await axios.get(rurl)

@@ -38,23 +38,6 @@ export default () => {
             Switch to Main page
           </Button>
         </Box>
-        {files.length ? (
-          <>
-            <FileList />
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() =>
-                  downloadFile(
-                    'http://localhost:3001/api/v1/download/123456-7890-1234-1234'
-                  )
-                }
-              >
-                Download
-              </Button>
-            </Box>
-          </>
-        ) : null}
       </Grid>
     </>
   )
