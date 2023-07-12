@@ -1,18 +1,22 @@
 import { Box, Button, Grid, Typography } from '@mui/material'
 
-import { selectFiles, setFiles, setScreen } from '../redux/globalsSlice'
+import {
+  selectFiles,
+  setFiles,
+  setScreen,
+  setPin,
+  selectPin,
+} from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { ChangeEvent, FormEvent, useCallback, useRef, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useRef } from 'react'
 import { BackendAPI, FileInfo, isAPIError } from '../BackendAPI'
 
 import { FileList } from '../components/FileList'
 
-const uuid = '123456-7890-1234-1234'
-
 export default () => {
   const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
-  const [pin, setPin] = useState('')
+  const pin: string = useAppSelector(selectPin)
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -32,11 +36,11 @@ export default () => {
 
       const { pin, filelist } = session
 
-      setPin(pin)
+      dispatch(setPin(pin))
 
       // Populate files info with uuids
       const filesWithUUID = files.map((fileInfo, i) => {
-        if (fileInfo.name != filelist[i].name) {
+        if (fileInfo.name !== filelist[i].name) {
           throw new Error('File name mismatch')
         }
         return {
@@ -51,7 +55,7 @@ export default () => {
 
         const formData = new FormData()
         formData.append('filecontent', file)
-        BackendAPI.uploadFile(uuid, formData)
+        BackendAPI.uploadFile(pin, uuid, formData)
       })
 
       dispatch(setFiles(filesWithUUID))

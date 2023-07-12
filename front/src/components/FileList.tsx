@@ -9,13 +9,35 @@ import {
 } from '@mui/material'
 
 import { FileInfo } from '../BackendAPI'
-import { selectFiles, setFiles } from '../redux/globalsSlice'
+import { selectFiles, selectPin, setFiles } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { useCallback } from 'react'
+
+const Link = ({
+  pin,
+  uuid,
+  name,
+  onClickCb,
+}: {
+  pin: string
+  uuid: string
+  name: string
+  onClickCb: (uuid: string) => void
+}) => {
+  return (
+    <a
+      href={`http://localhost:3001/api/v1/download/${pin}/${uuid}`}
+      onClick={() => onClickCb(uuid)}
+    >
+      {name}
+    </a>
+  )
+}
 
 export const FileList = () => {
   const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
+  const pin: string = useAppSelector(selectPin)
 
   const handleLinkClick = useCallback(
     (uuid: string) => {
@@ -63,20 +85,21 @@ export const FileList = () => {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell
-                //component="th"
                 scope="row"
                 sx={{
                   wordWrap: 'break-word',
                 }}
                 width="50%"
               >
-                {uuid && !requested ? (
-                  <a
-                    href={`http://localhost:3001/api/v1/download/${uuid}`}
-                    onClick={() => handleLinkClick(uuid)}
-                  >
-                    {name}
-                  </a>
+                {pin && uuid && !requested ? (
+                  <Link
+                    {...{
+                      pin,
+                      uuid,
+                      name,
+                      onClickCb: handleLinkClick,
+                    }}
+                  />
                 ) : (
                   name
                 )}

@@ -44,15 +44,20 @@ async function createSession(
   }
 }
 
-async function uploadFile(uuid: string, formData: FormData): Promise<any> {
+async function uploadFile(
+  pin: string,
+  uuid: string,
+  formData: FormData
+): Promise<any> {
   console.log('BackendAPI.uploadFile')
-  const rurl = `${API_URL}/upload/${uuid}`
 
-  if (!uuid) {
-    return {
-      error: `Request URL: ${rurl}. Can't upload file with uuid ${uuid}`,
-    }
-  }
+  const err = (msg: string) => ({
+    error: `uploadFile failed - ${msg}`,
+  })
+  if (!pin) return err(`invalid pin: ${pin}`)
+  if (!uuid) return err(`invalid uuid: ${uuid}`)
+
+  const rurl = `${API_URL}/upload/${pin}/${uuid}`
 
   try {
     const response = await axios.post(rurl, formData)
