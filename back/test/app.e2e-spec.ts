@@ -11,7 +11,6 @@ describe('AppController (e2e)', () => {
     TEST_SESSION_DATA: any;
     UUIDV4_REX: RegExp;
     pin?: string;
-    fileguid?: string;
   };
 
   beforeAll(async () => {
@@ -31,18 +30,22 @@ describe('AppController (e2e)', () => {
           name: 'file2.jpg',
           size: 34567,
         },
+        {
+          name: 'file3.txt',
+          size: 56789,
+        },
       ],
     };
     app.UUIDV4_REX =
       /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   });
 
-  // it('/session/create (POST)', async () => {
-  //   const createSessionResponse = await request(app.getHttpServer())
-  //     .post('/session/create')
-  //     .send({ invalidDto: {} })
-  //     .expect(500);
-  // });
+  it('/session/create (POST)', async () => {
+    const createSessionResponse = await request(app.getHttpServer())
+      .post('/session/create')
+      .send({ invalidDto: {} })
+      .expect(500);
+  });
 
   it('/session/create (POST)', async () => {
     const createSessionResponse = await request(app.getHttpServer())
@@ -82,25 +85,34 @@ describe('AppController (e2e)', () => {
     );
 
     // all files obtained a uuid
-    getSessionResponse.body.filelist.forEach((fileInfo) => {
+    getSessionResponse.body.filelist.forEach((fileInfo, i) => {
       expect(fileInfo.uuid).toMatch(app.UUIDV4_REX);
+    });
+
+    // populate global test suite data
+    getSessionResponse.body.filelist.forEach((fileInfo, i) => {
+      app.TEST_SESSION_DATA.filelist[i].uuid = fileInfo.uuid;
     });
   });
 
   it('/upload/:guid (POST)', async () => {
-    const guid = v4();
-    app.fileguid = guid;
-
     const content = `Hello, I'm a test file!`;
     const buffer = Buffer.from(content);
 
     const httpServer = app.getHttpServer();
 
+    const TEST_FILE_NAME = 'file3.txt';
+    const fileInfo = app.TEST_SESSION_DATA.filelist.find(
+      (f: { name: string; size: number }) => f.name === TEST_FILE_NAME,
+    );
+
+    expect(fileInfo !== undefined);
+
     const uploadRequest = request(httpServer)
-      .post(`/upload/${guid}`)
+      .post(`/upload/${app.pin}/${fileInfo.uuid}`)
       .set({ connection: 'keep-alive' })
       .attach('filecontent', buffer, {
-        filename: 'testfile.txt',
+        filename: fileInfo.name,
         contentType: 'text/plain; charset=utf-8',
       })
       .end(() => {});
@@ -110,7 +122,7 @@ describe('AppController (e2e)', () => {
     console.log('Await http get');
 
     const response = await request(httpServer)
-      .get(`/download/${guid}`)
+      .get(`/download/${app.pin}/${fileInfo.uuid}`)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(200);
 
