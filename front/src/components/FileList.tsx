@@ -8,7 +8,7 @@ import {
   Paper,
 } from '@mui/material'
 
-import { FileInfo } from '../BackendAPI'
+import { FileInfo, formatDownloadLink } from '../BackendAPI'
 import { selectFiles, selectPin, setFiles } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { useCallback } from 'react'
@@ -25,10 +25,7 @@ const Link = ({
   onClickCb: (uuid: string) => void
 }) => {
   return (
-    <a
-      href={`http://localhost:3001/v1/files/${pin}/${uuid}`}
-      onClick={() => onClickCb(uuid)}
-    >
+    <a href={formatDownloadLink(pin, uuid)} onClick={() => onClickCb(uuid)}>
       {name}
     </a>
   )
@@ -78,6 +75,7 @@ export const FileList = () => {
             </TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {files.map(({ name, size, uuid, requested }: FileInfo, i) => (
             <TableRow

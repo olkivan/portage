@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const API_URL = `http://localhost:3001/v1`
 
-// TODO: better to split into two separate types FileInfo and FileInfoDto?
+// TODO: better split into two separate types FileInfo and FileInfoDto
 export type FileInfo = {
   uuid?: string
   name: string
@@ -97,6 +97,9 @@ export interface APIError {
 export const isAPIError = (entity: any): entity is APIError => {
   return (entity as APIError).error !== undefined
 }
+
+export const formatDownloadLink = (pin: string, uuid: string) =>
+  `${API_URL}/files/${pin}/${uuid}`
 
 export const BackendAPI = {
   createSession,

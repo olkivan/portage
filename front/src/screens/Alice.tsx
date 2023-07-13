@@ -9,9 +9,10 @@ import {
 } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { ChangeEvent, FormEvent, useCallback, useRef } from 'react'
-import { BackendAPI, FileInfo, isAPIError } from '../BackendAPI'
+import { BackendAPI, FileInfo } from '../BackendAPI'
 
 import { FileList } from '../components/FileList'
+import { VERIFY } from '../CommonTypes'
 
 export default () => {
   const dispatch = useAppDispatch()
@@ -23,13 +24,10 @@ export default () => {
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      if (!files.length) {
-        console.log('No files are there')
-        return
-      }
+      VERIFY(files.length, 'No files are there')
 
       const session = await BackendAPI.createSession(files)
-      if (isAPIError(session)) {
+      if ('error' in session) {
         console.log(session.error)
         return
       }
@@ -40,9 +38,8 @@ export default () => {
 
       // Populate files info with uuids
       const filesWithUUID = files.map((fileInfo, i) => {
-        if (fileInfo.name !== filelist[i].name) {
-          throw new Error('File name mismatch')
-        }
+        VERIFY(fileInfo.name === filelist[i].name, 'File name mismatch')
+
         return {
           ...fileInfo,
           ...filelist[i],
@@ -50,11 +47,11 @@ export default () => {
       })
 
       filesWithUUID.map(({ name, file, uuid }) => {
-        if (!uuid) throw new Error(`File has no uuid: ${uuid} ${name}`)
-        if (!file) throw new Error(`File object is empty: ${uuid} ${name}`)
+        VERIFY(uuid, `File has no uuid: ${uuid} ${name}`)
+        VERIFY(file, `File object is empty: ${uuid} ${name}`)
 
         const formData = new FormData()
-        formData.append('filecontent', file)
+        formData.append('filecontent', file!)
         BackendAPI.uploadFile(pin, uuid, formData)
       })
 

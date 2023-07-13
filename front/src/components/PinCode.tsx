@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import PinField from 'react-pin-field'
-import { BackendAPI, isAPIError } from '../BackendAPI'
+import { BackendAPI } from '../BackendAPI'
 import clsx from 'clsx'
 
 import { useAppDispatch } from '../redux/hooks'
-import { setFiles } from '../redux/globalsSlice'
+import { setFiles, setPin } from '../redux/globalsSlice'
 
 import './PinCode.scss'
 
@@ -43,18 +43,20 @@ export default () => {
   const handleComplete = useCallback(
     async (pin: string) => {
       setCompleted(true)
-      const result = await BackendAPI.getSession(pin)
-      if (isAPIError(result)) {
-        console.log('Got error:', result.error)
-        setErrorMessage(result.error)
-        ref.current.forEach((input) => (input.value = ''))
+
+      const session = await BackendAPI.getSession(pin)
+      if ('error' in session) {
+        ref.current.forEach((input) => (input.value = '')) // clear input boxes
+        setErrorMessage(session.error)
         setCompleted(false)
-      } else {
-        setStatusMessage(`Pin ${pin} is valid`)
-        dispatch(setFiles(result.filelist))
+        return
       }
+
+      setStatusMessage(`Pin ${pin} is valid`)
+      dispatch(setPin(pin))
+      dispatch(setFiles(session.filelist))
     },
-    [completed, dispatch]
+    [dispatch]
   )
 
   const handleChange = useCallback(() => setErrorMessage(''), [])
