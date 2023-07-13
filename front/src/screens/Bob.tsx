@@ -1,24 +1,11 @@
-import { Box, Button, Grid, Typography } from '@mui/material'
+import { Box, Button, Grid } from '@mui/material'
 
 import { selectFiles, setScreen } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { FileInfo } from '../BackendAPI'
 import { FileList } from '../components/FileList'
 
-function downloadFile(href: string) {
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = href
-
-  document.body.appendChild(link)
-  link.click()
-
-  // To make this work on Firefox we need to wait
-  // a little while before removing it.
-  setTimeout(() => {
-    link.parentNode?.removeChild(link)
-  }, 0)
-}
+import PinCode from '../components/PinCode'
 
 export default () => {
   const dispatch = useAppDispatch()
@@ -27,8 +14,9 @@ export default () => {
   return (
     <>
       <Grid>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h4">Bob</Typography>
+        <Box>
+          <PinCode />
+          {files.length ? <FileList></FileList> : null}
         </Box>
         <Box>
           <Button

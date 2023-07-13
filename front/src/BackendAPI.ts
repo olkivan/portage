@@ -44,6 +44,18 @@ async function createSession(
   }
 }
 
+async function getSession(
+  pin: string
+): Promise<SessionDto | { error: string }> {
+  const rurl = `${API_URL}/sessions/${pin}`
+  try {
+    const response = await axios.get<SessionDto>(rurl)
+    return response.data
+  } catch (e: any) {
+    return { error: `${e.message}\nRequest URL: ${rurl}` }
+  }
+}
+
 async function uploadFile(
   pin: string,
   uuid: string,
@@ -88,6 +100,7 @@ export const isAPIError = (entity: any): entity is APIError => {
 
 export const BackendAPI = {
   createSession,
+  getSession,
   uploadFile,
   downloadFile,
 }
