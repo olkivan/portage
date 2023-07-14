@@ -1,14 +1,14 @@
 import { Box, Button, Grid } from '@mui/material'
 
-import { selectFiles, setScreen } from '../redux/globalsSlice'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { selectFiles } from '../redux/globalsSlice'
+import { useAppSelector } from '../redux/hooks'
 import { FileInfo } from '../BackendAPI'
 import { FileList } from '../components/FileList'
 
 import PinCode from '../components/PinCode'
+import { Link } from 'react-router-dom'
 
 export default () => {
-  const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
 
   return (
@@ -18,14 +18,9 @@ export default () => {
           <PinCode />
           {files.length ? <FileList></FileList> : null}
         </Box>
-        <Box>
-          <Button
-            variant="contained"
-            onClick={() => dispatch(setScreen('main'))}
-          >
-            Switch to Main page
-          </Button>
-        </Box>
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <Button variant="contained">Switch to Main page</Button>
+        </Link>
       </Grid>
     </>
   )

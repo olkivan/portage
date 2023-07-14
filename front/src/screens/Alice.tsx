@@ -1,18 +1,14 @@
 import { Box, Button, Grid, Typography } from '@mui/material'
 
-import {
-  selectFiles,
-  setFiles,
-  setScreen,
-  setPin,
-  selectPin,
-} from '../redux/globalsSlice'
+import { selectFiles, setFiles, setPin, selectPin } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { ChangeEvent, FormEvent, useCallback, useRef } from 'react'
 import { BackendAPI, FileInfo } from '../BackendAPI'
 
 import { FileList } from '../components/FileList'
 import { VERIFY } from '../CommonTypes'
+
+import { Link } from 'react-router-dom'
 
 export default () => {
   const dispatch = useAppDispatch()
@@ -83,12 +79,9 @@ export default () => {
             <Typography variant="h4">Alice</Typography>
           </Box>
           <Box>
-            <Button
-              variant="contained"
-              onClick={() => dispatch(setScreen('main'))}
-            >
-              Switch to Main page
-            </Button>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <Button variant="contained">Switch to Main page</Button>
+            </Link>
           </Box>
         </Grid>
         <Grid item>

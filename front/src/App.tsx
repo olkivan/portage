@@ -4,17 +4,16 @@ import Main from './screens/Main'
 import Alice from './screens/Alice'
 import Bob from './screens/Bob'
 
-import { selectScreen } from './redux/globalsSlice'
-import { useAppSelector } from './redux/hooks'
+import { Routes, Route } from 'react-router-dom'
 
 function App() {
-  const screen = useAppSelector(selectScreen)
-
   return (
     <div className="App">
-      {screen === 'main' && <Main />}
-      {screen === 'alice' && <Alice />}
-      {screen === 'bob' && <Bob />}
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/upload" element={<Alice />} />
+        <Route path="/download" element={<Bob />} />
+      </Routes>
     </div>
   )
 }
