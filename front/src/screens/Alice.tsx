@@ -8,8 +8,6 @@ import { BackendAPI, FileInfo } from '../BackendAPI'
 import { FileList } from '../components/FileList'
 import { VERIFY } from '../CommonTypes'
 
-import { Link } from 'react-router-dom'
-
 export default () => {
   const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
@@ -76,12 +74,7 @@ export default () => {
       <Grid>
         <Grid item>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="h4">Alice</Typography>
-          </Box>
-          <Box>
-            <Link to="/" style={{ textDecoration: 'none' }}>
-              <Button variant="contained">Switch to Main page</Button>
-            </Link>
+            <Typography variant="h4">Transfer</Typography>
           </Box>
         </Grid>
         <Grid item>
@@ -100,7 +93,7 @@ export default () => {
             </Button>
           </Box>
         </Grid>
-        {files.length ? <FileList></FileList> : null}
+        {files.length ? <FileList enableLinks={false} /> : null}
         {pin ? (
           <Grid item>
             <Box sx={{ mt: 2 }}>
@@ -108,7 +101,7 @@ export default () => {
               <Typography variant="h6">(share it with other party)</Typography>
             </Box>
           </Grid>
-        ) : (
+        ) : files.length ? (
           <Grid item>
             <Box sx={{ mt: 2 }}>
               <Button type="submit" variant="contained">
@@ -116,7 +109,7 @@ export default () => {
               </Button>
             </Box>
           </Grid>
-        )}
+        ) : null}
       </Grid>
     </form>
   )

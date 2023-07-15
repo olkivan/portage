@@ -31,7 +31,7 @@ const Link = ({
   )
 }
 
-export const FileList = () => {
+export const FileList = ({ enableLinks }: { enableLinks: boolean }) => {
   const dispatch = useAppDispatch()
   const files: FileInfo[] = useAppSelector(selectFiles)
   const pin: string = useAppSelector(selectPin)
@@ -51,6 +51,8 @@ export const FileList = () => {
     },
     [files]
   )
+
+  console.log('With links:', enableLinks)
 
   return (
     <TableContainer component={Paper}>
@@ -89,7 +91,7 @@ export const FileList = () => {
                 }}
                 width="50%"
               >
-                {pin && uuid && !requested ? (
+                {enableLinks && pin && uuid && !requested ? (
                   <Link
                     {...{
                       pin,

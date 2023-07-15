@@ -7,18 +7,18 @@ export default () => {
     <>
       <Grid>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h4">Main Page</Typography>
+          <Typography variant="h4">I want to</Typography>
         </Box>
 
         <Box>
           <Link to="/upload" style={{ textDecoration: 'none' }}>
             <Button sx={{ m: 2 }} variant="contained" color="primary">
-              Switch to Alice
+              Transfer files
             </Button>
           </Link>
           <Link to="/download" style={{ textDecoration: 'none' }}>
             <Button sx={{ m: 2 }} variant="contained" color="secondary">
-              Switch to Bob
+              Receive files
             </Button>
           </Link>
         </Box>

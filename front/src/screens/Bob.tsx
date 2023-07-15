@@ -16,7 +16,7 @@ export default () => {
       <Grid>
         <Box>
           <PinCode />
-          {files.length ? <FileList></FileList> : null}
+          {files.length ? <FileList enableLinks={true} /> : null}
         </Box>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <Button variant="contained">Switch to Main page</Button>
