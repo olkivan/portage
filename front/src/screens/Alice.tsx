@@ -77,28 +77,30 @@ export default () => {
             <Typography variant="h4">Transfer</Typography>
           </Box>
         </Grid>
-        <Grid item>
-          <Box>
-            <Button variant="contained" component="label">
-              Choose files to transfer...
-              <input
-                type="file"
-                ref={fileRef}
-                id="files_to_upload"
-                name="files_to_upload"
-                multiple
-                hidden
-                onChange={handleUploadListChange}
-              />
-            </Button>
-          </Box>
-        </Grid>
+        {files.length == 0 && (
+          <Grid item>
+            <Box>
+              <Button variant="contained" component="label">
+                Choose files to transfer...
+                <input
+                  type="file"
+                  ref={fileRef}
+                  id="files_to_upload"
+                  name="files_to_upload"
+                  multiple
+                  hidden
+                  onChange={handleUploadListChange}
+                />
+              </Button>
+            </Box>
+          </Grid>
+        )}
         {files.length ? <FileList enableLinks={false} /> : null}
         {pin ? (
           <Grid item>
             <Box sx={{ mt: 2 }}>
               <Typography variant="h5">PIN: {pin}</Typography>
-              <Typography variant="h6">(share it with other party)</Typography>
+              <Typography variant="h6">(share with other party)</Typography>
             </Box>
           </Grid>
         ) : files.length ? (

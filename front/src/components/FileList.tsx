@@ -13,6 +13,18 @@ import { selectFiles, selectPin, setFiles } from '../redux/globalsSlice'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { useCallback } from 'react'
 
+function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
 const Link = ({
   pin,
   uuid,
@@ -60,7 +72,7 @@ export const FileList = ({ enableLinks }: { enableLinks: boolean }) => {
         style={{ width: '100%', tableLayout: 'fixed' }}
         aria-label="file list table"
       >
-        <TableHead>
+        <TableHead sx={{ th: { fontWeight: 'bold' } }}>
           <TableRow>
             <TableCell
               width="50%"
@@ -105,7 +117,7 @@ export const FileList = ({ enableLinks }: { enableLinks: boolean }) => {
                 )}
               </TableCell>
               <TableCell width="25%" align="right">
-                {size}
+                {formatBytes(size)}
               </TableCell>
             </TableRow>
           ))}
