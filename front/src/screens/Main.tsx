@@ -11,13 +11,21 @@ export default () => {
         </Box>
 
         <Box>
-          <Link to="/upload" style={{ textDecoration: 'none' }}>
-            <Button sx={{ m: 2 }} variant="contained" color="primary">
+          <Link to="/portage/upload" style={{ textDecoration: 'none' }}>
+            <Button
+              sx={{ m: 2, width: '10rem' }}
+              variant="contained"
+              color="primary"
+            >
               Transfer files
             </Button>
           </Link>
-          <Link to="/download" style={{ textDecoration: 'none' }}>
-            <Button sx={{ m: 2 }} variant="contained" color="secondary">
+          <Link to="/portage/download" style={{ textDecoration: 'none' }}>
+            <Button
+              sx={{ m: 2, width: '10rem' }}
+              variant="contained"
+              color="secondary"
+            >
               Receive files
             </Button>
           </Link>

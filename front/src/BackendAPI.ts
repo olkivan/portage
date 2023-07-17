@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-export const API_URL = `http://localhost:3001/v1`
+export const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? `${process.env.PUBLIC_URL}/v1`
+    : `http://${window.location.hostname}:9001/v1`
 
 // TODO: better split into two separate types FileInfo and FileInfoDto
 export type FileInfo = {

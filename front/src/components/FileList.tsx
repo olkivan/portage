@@ -64,8 +64,6 @@ export const FileList = ({ enableLinks }: { enableLinks: boolean }) => {
     [files]
   )
 
-  console.log('With links:', enableLinks)
-
   return (
     <TableContainer component={Paper}>
       <Table
